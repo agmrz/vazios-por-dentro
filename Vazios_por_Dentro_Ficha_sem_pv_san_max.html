@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vazios por Dentro — Ficha de Personagem</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0d0e10;color:#e9e5df;font-family:Georgia,serif;padding:18px}
+main{max-width:1050px;margin:auto}
+.top{display:flex;gap:18px;align-items:center;margin-bottom:15px}
+.photo{width:150px;height:190px;border:1px solid #555;background:#17191c;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.photo img{width:100%;height:100%;object-fit:cover}.photo span{text-align:center;color:#777;font:12px Arial}
+.title h1{margin:0;font-size:30px;letter-spacing:4px}.title p{color:#888;font:11px Arial;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.wide{grid-column:1/-1}
+.card{background:#1a1c1f;border:1px solid #444;border-radius:10px;padding:14px;box-shadow:0 8px 20px #0005}
+h2{font-size:15px;letter-spacing:2px;margin:0 0 11px;border-bottom:1px solid #444;padding-bottom:7px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+label{display:block;color:#aaa;font:10px Arial;text-transform:uppercase;letter-spacing:1px;margin:7px 0 4px}
+input,textarea,select{width:100%;background:#0e0f11;color:#eee;border:1px solid #414348;border-radius:6px;padding:8px;font:14px Georgia}
+input:disabled{opacity:.8;cursor:not-allowed}.calc{background:#15171a;font-weight:bold}
+textarea{min-height:80px;resize:vertical}
+.stat{display:flex;align-items:center;gap:7px;margin:7px 0}.stat b{width:105px}
+.stat button{width:36px;height:32px;background:#292c30;color:#eee;border:1px solid #555;border-radius:6px;font-size:18px;cursor:pointer}
+.value{font:bold 20px Arial;width:48px;text-align:center}
+.bar{height:11px;background:#08090a;border:1px solid #333;border-radius:20px;overflow:hidden;margin:6px 0 11px}
+.fill{height:100%;background:#b9a58c;transition:.2s}.san{background:#71829b}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.summary div{background:#111315;border:1px solid #373a3e;border-radius:7px;padding:8px}
+.summary b{display:block;font:10px Arial;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.summary span{font:bold 15px Arial}
+.condition-box{margin-top:10px;background:#111315;border:1px solid #373a3e;border-radius:7px;padding:10px}
+.condition-box h3{margin:0 0 7px;color:#b9a58c;font-size:14px}
+.condition-box p{margin:5px 0;font-size:12px;line-height:1.45}
+.condition-box strong{color:#ddd}
+.skills{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.skillbox{background:#111315;border:1px solid #373a3e;border-radius:7px;padding:8px}
+.skillbox h3{color:#b9a58c;font:10px Arial;letter-spacing:1px}
+.skillbox label{text-transform:none;letter-spacing:0;color:#ddd;font-size:12px}
+.attr{display:grid;grid-template-columns:1fr 90px;gap:7px;align-items:center;margin:7px 0}.attr select{text-align:center}
+.note{color:#888;font:10px Arial;line-height:1.4;margin-top:8px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.skills{grid-template-columns:1fr 1fr}.top{align-items:flex-start}.photo{width:110px;height:145px}.row,.summary{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<div class="top">
+  <div class="photo" id="photoBox"><span>FOTO DO<br>PERSONAGEM</span></div>
+  <div class="title">
+    <h1>VAZIOS POR DENTRO</h1><p>FICHA DIGITAL DE PERSONAGEM</p>
+    <label style="margin-top:12px">Selecionar foto</label>
+    <input id="foto" type="file" accept="image/*">
+  </div>
+</div>
+
+<div class="grid">
+<section class="card wide">
+  <h2>IDENTIDADE</h2>
+  <div class="row">
+    <div><label>Nome</label><input id="nome"></div>
+    <div><label>Jogador</label><input id="jogador"></div>
+  </div>
+  <label>Origem</label><input id="origem">
+  <label>Conceito / descrição</label><textarea id="conceito"></textarea>
+</section>
+
+<section class="card">
+  <h2>ATRIBUTOS</h2>
+  <div id="atributos"></div>
+  <div class="note">Os bônus de Atributo seguem o sistema: +0, +1, +2 e +3.</div>
+</section>
+
+<section class="card">
+  <h2>VITALIDADE</h2>
+  <div class="row">
+    <div><label>Base de Vitalidade (1–5)</label><input id="basePv" type="number" min="1" max="5" step="1" value="3"></div>
+    <div><label>Vitalidade por Nível</label><input id="pvNivel" class="calc" type="number" disabled></div>
+  </div>
+  <div class="stat"><b>PV ATUAL</b><button type="button" onclick="alterar('pv',-1)">−</button><span class="value" id="pv">9</span><button type="button" onclick="alterar('pv',1)">+</button></div>
+  <div class="bar"><div id="pvBar" class="fill"></div></div>
+  <div class="summary">
+    <div><b>Estado</b><span id="pvEstado">Saudável</span></div>
+  </div>
+  <div class="note">Vitalidade por Nível = Base + Corpo + Bônus de Instinto. O Bônus de Instinto é +0 com Instinto 0–1, +1 com Instinto 2 e +2 com Instinto 3.</div>
+  <label>Ferimentos</label><textarea id="ferimentos"></textarea>
+</section>
+
+<section class="card">
+  <h2>SANIDADE</h2>
+  <div class="row">
+    <div><label>Base de Sanidade (1–5)</label><input id="baseSan" type="number" min="1" max="5" step="1" value="3"></div>
+    <div><label>Sanidade por Estágio</label><input id="sanEstagio" class="calc" type="number" disabled></div>
+  </div>
+  <div class="stat"><b>SANIDADE</b><button type="button" onclick="alterar('san',-1)">−</button><span class="value" id="san">9</span><button type="button" onclick="alterar('san',1)">+</button></div>
+  <div class="bar"><div id="sanBar" class="fill san"></div></div>
+  <div class="summary">
+    <div><b>Estágio</b><span id="sanEstado">Estabilidade</span></div>
+  </div>
+  <label>Condição Mental Temporária</label>
+  <select id="condicao">
+    <option>Nenhuma</option><option>Ataque de Pânico</option><option>Dissociação</option><option>Hipervigilância</option><option>Paranoia</option><option>Fuga Desesperada</option><option>Catatonia</option><option>Raiva Impulsiva</option><option>Entorpecimento Emocional</option><option>Pensamentos Intrusivos</option><option>Desorientação</option>
+  </select>
+  <div class="condition-box" id="condicaoDescricao"></div>
+</section>
+
+<section class="card wide"><h2>PERÍCIAS</h2><div class="skills" id="pericias"></div></section>
+<section class="card"><h2>HABILIDADES</h2><textarea id="habilidades"></textarea></section>
+<section class="card"><h2>ÂNCORAS</h2><textarea id="ancoras" placeholder="Pessoas, objetos, lugares, lembranças ou elementos que mantêm o personagem ligado à própria humanidade."></textarea></section>
+<section class="card wide"><h2>INVENTÁRIO / EQUIPAMENTO</h2><textarea id="inventario"></textarea></section>
+<section class="card wide"><h2>ANOTAÇÕES</h2><textarea id="anotacoes"></textarea></section>
+</div>
+<br><small>Ficha salva automaticamente neste navegador. A foto também fica armazenada localmente neste dispositivo.</small>
+</main>
+
+<script>
+const attrs=["Presença","Intelecto","Corpo","Instinto"];
+const skills={
+  Presença:["Enganação","Intimidação","Psicologia","Religião","Vontade"],
+  Intelecto:["Investigação","Medicina","Tecnologia","Conhecimento Local","Ocultismo","Sobrevivência"],
+  Corpo:["Atletismo","Fortitude","Armas Brancas","Briga"],
+  Instinto:["Arremesso","Furtividade","Armas de Fogo","Crime","Iniciativa","Percepção","Reflexos"]
+};
+
+const conditionData={
+  "Nenhuma":{efeito:"Nenhuma condição mental temporária.",superar:"—",auxilio:"—"},
+  "Ataque de Pânico":{efeito:"Não pode realizar ações complexas. Pode apenas se mover, falar frases curtas, defender-se ou fugir.",superar:"Ao final de cada turno, faça um teste de Vontade. Em caso de sucesso, a condição termina.",auxilio:"Um aliado pode realizar um teste de Psicologia. Em caso de sucesso, você recebe vantagem no próximo teste de Vontade."},
+  "Dissociação":{efeito:"−2 em testes de Percepção. Não pode realizar Reações.",superar:"Faça um teste de Vontade ao final de cada turno.",auxilio:"—"},
+  "Hipervigilância":{efeito:"+2 em testes de Percepção, porém −2 em Intelecto.",superar:"Quando a fonte do perigo desaparecer, faça um teste de Vontade para recuperar a calma.",auxilio:"—"},
+  "Paranoia":{efeito:"Não pode receber bônus, vantagens ou benefícios concedidos por outros personagens.",superar:"Ao fim de uma interação com um personagem, faça um teste de Vontade.",auxilio:"—"},
+  "Fuga Desesperada":{efeito:"Deve utilizar seu deslocamento tentando se afastar da ameaça. Não pode se aproximar voluntariamente dela.",superar:"Assim que perder contato direto com a ameaça, faça um teste de Vontade.",auxilio:"—"},
+  "Catatonia":{efeito:"Incapaz de agir, falar, realizar Reações ou testes voluntários.",superar:"Um aliado deve gastar uma ação para tentar despertá-lo. Em seguida, faça um teste de Vontade.",auxilio:"Medicina ou Psicologia concedem vantagem no teste."},
+  "Raiva Impulsiva":{efeito:"+2 em ataques corpo a corpo. −2 em testes sociais. Não pode realizar ações de apoio ou negociação.",superar:"No início de cada turno, faça um teste de Vontade.",auxilio:"—"},
+  "Entorpecimento Emocional":{efeito:"Ignora efeitos de medo, porém sofre −2 em Presença.",superar:"Ao final da cena, faça um teste de Vontade.",auxilio:"—"},
+  "Pensamentos Intrusivos":{efeito:"Sempre que realizar um teste baseado em Intelecto, faça antes um teste de Vontade. Se falhar, o teste recebe +1 de dificuldade.",superar:"Faça um teste de Vontade ao final de cada cena.",auxilio:"—"},
+  "Desorientação":{efeito:"Não pode utilizar mapas, rotas conhecidas ou habilidades que dependam de orientação.",superar:"Realize um teste de Percepção, Conhecimento Local ou Sobrevivência, conforme a situação.",auxilio:"—"}
+};
+
+let s={pv:9,san:9};
+let loadedData={};
+
+function attrValue(name){
+  const e=document.getElementById("attr_"+name);
+  const n=Number(e?.value);
+  return Number.isFinite(n)?n:0;
+}
+
+function instinctBonus(){
+  const i=attrValue("Instinto");
+  if(i>=3)return 2;
+  if(i>=2)return 1;
+  return 0;
+}
+
+function calcSanPerStage(){
+  // Sanidade por Estágio = Base de Sanidade + Presença + Intelecto
+  return clampInt(
+    getBase("baseSan",3)+attrValue("Presença")+attrValue("Intelecto"),
+    0, 99
+  );
+}
+
+function calcPvPerLevel(){
+  // Vitalidade por Nível = Base de Vitalidade + Corpo + Bônus de Instinto
+  return clampInt(
+    getBase("basePv",3)+attrValue("Corpo")+instinctBonus(),
+    0, 99
+  );
+}
+
+function getBase(id, fallback){
+  const n=Number(document.getElementById(id)?.value);
+  return Number.isFinite(n)?n:fallback;
+}
+
+function clampInt(n,min,max){return Math.min(max,Math.max(min,Math.round(n)))}
+
+function currentOrDefault(key,max,oldMax){
+  const value=Number(s[key]);
+  if(!Number.isFinite(value)) return max;
+  if(!Number.isFinite(oldMax) || oldMax<=0) return clampInt(value,0,max);
+  // If the old value was exactly full, keep the new value full.
+  if(value===oldMax) return max;
+  return clampInt(value,0,max);
+}
+
+function init(){
+  atributos.innerHTML=attrs.map(a=>`
+    <div class="attr">
+      <b>${a}</b>
+      <select id="attr_${a}" aria-label="${a}">
+        <option value="0">+0</option><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option>
+      </select>
+    </div>`).join("");
+
+  pericias.innerHTML=Object.entries(skills).map(([a,p])=>`
+    <div class="skillbox"><h3>${a}</h3>
+      ${p.map(x=>`<label><input type="checkbox" id="skill_${x}"> ${x}</label>`).join("")}
+    </div>`).join("");
+
+  document.querySelectorAll("input,textarea,select").forEach(e=>{
+    e.addEventListener("input",onFieldChange);
+    e.addEventListener("change",onFieldChange);
+  });
+  foto.addEventListener("change",readPhoto);
+
+  load();
+  recalc(true);
+  updateCondition();
+}
+
+function onFieldChange(e){
+  if(e.target.id==="condicao"){updateCondition();save();return;}
+  if(["basePv","baseSan","attr_Presença","attr_Intelecto","attr_Corpo","attr_Instinto"].includes(e.target.id)){
+    recalc(false);
+  }else{
+    save();
+  }
+}
+
+function alterar(k,d){
+  const max=k==="pv"?calcPvPerLevel()*3:calcSanPerStage()*3;
+  s[k]=clampInt(Number(s[k])+d,0,max);
+  render();
+  save();
+}
+
+function recalc(initial){
+  const oldPvMax=Number(s.pvMaxSaved);
+  const oldSanMax=Number(s.sanMaxSaved);
+  const pvPer=calcPvPerLevel();
+  const sanPer=calcSanPerStage();
+  const pvMax=pvPer*3;
+  const sanMax=sanPer*3;
+
+  s.pv=currentOrDefault("pv",pvMax,oldPvMax);
+  s.san=currentOrDefault("san",sanMax,oldSanMax);
+
+  if(!initial){
+    s.pv=clampInt(s.pv,0,pvMax);
+    s.san=clampInt(s.san,0,sanMax);
+  }
+  s.pvMaxSaved=pvMax;
+  s.sanMaxSaved=sanMax;
+  render();
+  save();
+}
+
+function render(){
+  const pvPer=calcPvPerLevel(), sanPer=calcSanPerStage();
+  const pvMax=pvPer*3, sanMax=sanPer*3;
+  s.pv=clampInt(Number(s.pv),0,pvMax);
+  s.san=clampInt(Number(s.san),0,sanMax);
+
+  pvNivel.value=pvPer;
+  sanEstagio.value=sanPer;
+  pv.textContent=s.pv;
+  san.textContent=s.san;
+  pvMax.textContent=pvMax;
+  sanMax.textContent=sanMax;
+  pvBar.style.width=(pvMax>0?s.pv/pvMax*100:0)+"%";
+  sanBar.style.width=(sanMax>0?s.san/sanMax*100:0)+"%";
+
+  pvEstado.textContent=getVitalityState(s.pv,pvPer);
+  sanEstado.textContent=getSanityState(s.san,sanPer);
+}
+
+function getVitalityState(value,level){
+  if(value===0)return "Gravemente Ferido";
+  if(value<=level)return "Gravemente Ferido";
+  if(value<=Math.ceil(level*1.5))return "Ferido";
+  return "Saudável";
+}
+
+function getSanityState(value,stage){
+  if(value===0)return "Quebra Mental";
+  if(value<=stage)return "Abalado";
+  if(value<=Math.ceil(stage*1.5))return "Inquieto";
+  return "Estabilidade";
+}
+
+function updateCondition(){
+  const name=condicao.value;
+  const c=conditionData[name]||conditionData["Nenhuma"];
+  condicaoDescricao.innerHTML=`
+    <h3>${name}</h3>
+    <p><strong>Efeito:</strong> ${c.efeito}</p>
+    <p><strong>Como superar:</strong> ${c.superar}</p>
+    <p><strong>Auxílio:</strong> ${c.auxilio}</p>`;
+}
+
+function save(){
+  const data={...loadedData,s:{...s}};
+  document.querySelectorAll("input,textarea,select").forEach(e=>{
+    if(e.type==="file")return;
+    data[e.id]=e.type==="checkbox"?e.checked:e.value;
+  });
+  localStorage.vpd3=JSON.stringify(data);
+}
+
+function load(){
+  try{
+    const d=JSON.parse(localStorage.vpd3||"null");
+    if(d){loadedData=d;s=d.s||s;}
+  }catch(e){loadedData={};}
+
+  Object.entries(loadedData).forEach(([k,v])=>{
+    const e=document.getElementById(k);
+    if(!e)return;
+    if(e.type==="checkbox")e.checked=!!v;
+    else if(e.id!=="pvNivel"&&e.id!=="sanEstagio")e.value=v;
+  });
+
+  if(loadedData.fotoData)photoBox.innerHTML=`<img src="${loadedData.fotoData}" alt="Foto do personagem">`;
+
+  // Migração segura da ficha antiga: preserva textos, mas deixa os cálculos serem refeitos.
+  if(!loadedData.basePv) document.getElementById("basePv").value=3;
+  if(!loadedData.baseSan) document.getElementById("baseSan").value=3;
+}
+
+function readPhoto(e){
+  const f=e.target.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    photoBox.innerHTML=`<img src="${r.result}" alt="Foto do personagem">`;
+    loadedData.fotoData=r.result;
+    save();
+  };
+  r.readAsDataURL(f);
+}
+
+init();
+</script>
+</body></html>
